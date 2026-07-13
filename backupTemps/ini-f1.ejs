@@ -167,6 +167,9 @@
     color: #334155;
     margin-bottom: 4px;
   }
+  .payment {
+    margin-top: 22px;
+  }
   table {
     width: 100%;
     border-collapse: collapse;
@@ -307,6 +310,15 @@
     </div>
   </section>
 
+  <section class="payment">
+    <div class="section-title">Payment Info:</div>
+    <p>
+      Payment Status: <%= value(payment.status, value(typeof paymentStatus !== "undefined" ? paymentStatus : undefined, "PAID")) %><br>
+      Payment Mode: <%= value(payment.mode, value(typeof paymentMode !== "undefined" ? paymentMode : undefined, "")) %><br>
+      Transaction ID: <%= value(payment.transactionId, value(typeof transactionId !== "undefined" ? transactionId : undefined, "")) %>
+    </p>
+  </section>
+
   <table>
     <thead>
       <tr>
@@ -343,7 +355,7 @@
         </tr>
       <% } %>
       <tr class="total-row">
-        <td>TOTAL</td>
+        <td></td>
         <td class="payment-mode"><%= paymentModeText ? `${paymentModeText} (mode of payment)` : "Mode of payment" %></td>
         <td class="number"><%= amount(totalUnitAmount) %></td>
         <td class="number"><%= totalQuantity %></td>

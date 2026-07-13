@@ -25,6 +25,8 @@ app.set("views", "./views");
 const data = {
   invoiceNumber: "INV-PC1207260001",
   issueDate: "12/7/2026",
+  orderNumber: "PC1207260001",
+  orderDate: "12/7/2026",
   orderStatus: "RECEIVED",
   currency: "Rs. ",
   qrCodeDataUrl,
