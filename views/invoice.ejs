@@ -260,6 +260,10 @@
   }
   .footer-contact {
     color: #475569;
+    text-align: right;
+  }
+  .footer-tagline {
+    color: #475569;
   }
   .page {
     display: block;
@@ -382,14 +386,12 @@
   </section>
 
   <footer class="notes">
-    <div class="footer-contact">
-      <%= value(sellerData.tagline, "Online Document Printing & Stationery Services") %><br>
-      Email: <%= value(sellerData.email, "support@printcampus.com") %><br>
-      Website: <%= value(sellerData.website, "www.printcampus.com") %>
+    <div class="footer-tagline">
+      <%= value(sellerData.tagline, "Online Document Printing & Stationery Services") %>
     </div>
-    <div>
-      <span>This is a computer-generated tax invoice and requires no physical signature.</span>
-      <span class="page">Page 1 of 1</span>
+    <div class="footer-contact">
+      Email: <%= value(sellerData.email, "support@printcampus.in") %><br>
+      Website: <%= value(sellerData.website, "www.printcampus.in") %>
     </div>
   </footer>
 </body>

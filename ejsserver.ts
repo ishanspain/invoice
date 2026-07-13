@@ -37,14 +37,14 @@ const data = {
     address: "123 Campus Plaza, Sector 62",
     city: "Noida, Uttar Pradesh - 201301",
     gstin: "09AAAACCP1234A1Z5",
-    email: "support@printcampus.com",
-    website: "www.printcampus.com",
+    email: "support@printcampus.in",
+    website: "www.printcampus.in",
   },
   customerInfo: {
     name: "Karan k",
     address: "P62G+XQX, P.W.D, Magazine Rd, Block J, Majnu-ka-tilla, Timarpur",
     city: "Delhi, Delhi - 110054",
-    phone: "+91 7428799482",
+    phone: "+91 1122334455",
   },
   paymentInfo: {
     status: "PAID",
