@@ -90,6 +90,8 @@
   const grandTotal = value(totalsData.grandTotal, value(typeof total !== "undefined" ? total : undefined, 0));
   const brandName = value(sellerData.brandName, value(sellerData.name, "PrintCampus"));
   const brandLogoSrc = value(sellerData.logoDataUri, value(typeof logoDataUri !== "undefined" ? logoDataUri : undefined, ""));
+  const qrCodeSrc = value(typeof qrCodeDataUrl !== "undefined" ? qrCodeDataUrl : undefined, value(typeof qrCodeDataUri !== "undefined" ? qrCodeDataUri : undefined, ""));
+  const signatureSrc = value(typeof signatureDataUri !== "undefined" ? signatureDataUri : undefined, value(sellerData.signatureDataUri, ""));
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -202,9 +204,33 @@
     line-height: 1.45;
     overflow-wrap: anywhere;
   }
+  .invoice-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 32px;
+    margin-top: 26px;
+  }
+  .invoice-qr {
+    width: 150px;
+  }
+  .invoice-qr img {
+    display: block;
+    margin-bottom: 12px;
+  }
+  .invoice-qr-code {
+    width: 130px;
+    height: 130px;
+    object-fit: contain;
+  }
+  .invoice-signature {
+    width: 130px;
+    height: 58px;
+    object-fit: contain;
+  }
   .summary {
     width: 255px;
-    margin: 26px 0 0 auto;
+    margin-left: auto;
   }
   .summary-row {
     display: flex;
@@ -334,14 +360,25 @@
     </tbody>
   </table>
 
-  <section class="summary">
-    <div class="summary-row"><span>Item Subtotal:</span><span><%= amount(itemSubtotal) %></span></div>
-    <div class="summary-row"><span>Add-ons Subtotal:</span><span><%= amount(invoiceAddonsSubtotal) %></span></div>
-    <div class="summary-row"><span>Delivery Fee:</span><span><%= amount(invoiceDeliveryFee) %></span></div>
-    <div class="summary-row"><span>Platform Fee:</span><span><%= amount(invoicePlatformFee) %></span></div>
-    <div class="summary-row"><span>Discount:</span><span>-<%= amount(invoiceDiscount) %></span></div>
-    <div class="summary-row"><span>Tax (GST):</span><span><%= amount(invoiceTaxAmount) %></span></div>
-    <div class="summary-row summary-total"><span>Grand Total:</span><span><%= money(grandTotal) %></span></div>
+  <section class="invoice-bottom">
+    <% if (qrCodeSrc) { %>
+      <div class="invoice-qr">
+        <img class="invoice-qr-code" src="<%= qrCodeSrc %>" alt="Invoice verification QR code">
+        <% if (signatureSrc) { %>
+          <img class="invoice-signature" src="<%= signatureSrc %>" alt="Authorized signature">
+        <% } %>
+      </div>
+    <% } %>
+
+    <div class="summary">
+      <div class="summary-row"><span>Item Subtotal:</span><span><%= amount(itemSubtotal) %></span></div>
+      <div class="summary-row"><span>Add-ons Subtotal:</span><span><%= amount(invoiceAddonsSubtotal) %></span></div>
+      <div class="summary-row"><span>Delivery Fee:</span><span><%= amount(invoiceDeliveryFee) %></span></div>
+      <div class="summary-row"><span>Platform Fee:</span><span><%= amount(invoicePlatformFee) %></span></div>
+      <div class="summary-row"><span>Discount:</span><span>-<%= amount(invoiceDiscount) %></span></div>
+      <div class="summary-row"><span>Tax (GST):</span><span><%= amount(invoiceTaxAmount) %></span></div>
+      <div class="summary-row summary-total"><span>Grand Total:</span><span><%= money(grandTotal) %></span></div>
+    </div>
   </section>
 
   <footer class="notes">
@@ -351,7 +388,7 @@
       Website: <%= value(sellerData.website, "www.printcampus.com") %>
     </div>
     <div>
-      <span>This is a computer-generated tax invoice and requires no physical or digital signature.</span>
+      <span>This is a computer-generated tax invoice and requires no physical signature.</span>
       <span class="page">Page 1 of 1</span>
     </div>
   </footer>

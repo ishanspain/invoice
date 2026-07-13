@@ -7,6 +7,7 @@
 
 ## express server
 > Shown the example, how use this template
+- start the ejsserver to view the ejs template preview on this path = /
 
 ## QRcode
 

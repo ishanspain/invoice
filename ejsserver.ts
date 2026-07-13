@@ -4,6 +4,7 @@ import ejs from "ejs";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import qrCodeDataUrl from "./qr.ts";
 // import puppeteer from "puppeteer";
 // import htmlPdf from "html-pdf-node";
 
@@ -11,6 +12,10 @@ const app = express();
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const printCampusLogoDataUri = `data:image/jpeg;base64,${readFileSync(
   join(__dirname, "assets", "brand", "printcampus-logo-w.jpeg"),
+  "base64",
+)}`;
+const printCampusSignatureDataUri = `data:image/jpeg;base64,${readFileSync(
+  join(__dirname, "assets", "brand", "pc-sign.jpg"),
   "base64",
 )}`;
 
@@ -22,6 +27,8 @@ const data = {
   issueDate: "12/7/2026",
   orderStatus: "RECEIVED",
   currency: "Rs. ",
+  qrCodeDataUrl,
+  signatureDataUri: printCampusSignatureDataUri,
   sellerInfo: {
     brandName: "PrintCampus",
     logoDataUri: printCampusLogoDataUri,
