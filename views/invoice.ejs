@@ -2,7 +2,7 @@
   const value = (input, fallback = "") =>
     input !== undefined && input !== null && input !== "" ? input : fallback;
 
-  const currencySymbol = value(typeof currency !== "undefined" ? currency : undefined, "Rs. ");
+  const currencySymbol = value(typeof currency !== "undefined" ? currency : undefined, "₹");
   const invoiceId = value(typeof invoiceNumber !== "undefined" ? invoiceNumber : undefined);
   const invoiceDate = value(typeof issueDate !== "undefined" ? issueDate : undefined, value(typeof date !== "undefined" ? date : undefined));
   const orderNumberText = value(typeof orderNumber !== "undefined" ? orderNumber : undefined, value(typeof orderId !== "undefined" ? orderId : undefined, value(invoiceId, "PC1207260001")));
@@ -490,7 +490,7 @@
               <span><%= amount(totalDiscountAmount) %></span>
             </div>
             <div class="pricing-summary-line">
-              <span>Tax (GST):</span>
+              <span>Tax (18% IGST):</span>
               <span><%= amount(totalTaxValue) %></span>
             </div>
             <div class="pricing-summary-line pricing-summary-total">

@@ -28,7 +28,7 @@ const data = {
   orderNumber: "PC1207260001",
   orderDate: "12/7/2026",
   orderStatus: "RECEIVED",
-  currency: "Rs. ",
+  currency: "₹",
   qrCodeDataUrl,
   signatureDataUri: printCampusSignatureDataUri,
   sellerInfo: {
