@@ -1,0 +1,3 @@
+ sig = HMAC-SHA256(invoiceId, secret)
+
+ https://printcampus.com/verify/INV-2026-00045?sig=a1b2c3...

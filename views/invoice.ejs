@@ -1,0 +1,359 @@
+<%
+  const value = (input, fallback = "") =>
+    input !== undefined && input !== null && input !== "" ? input : fallback;
+
+  const currencySymbol = value(typeof currency !== "undefined" ? currency : undefined, "Rs. ");
+  const invoiceId = value(typeof invoiceNumber !== "undefined" ? invoiceNumber : undefined);
+  const invoiceDate = value(typeof issueDate !== "undefined" ? issueDate : undefined, value(typeof date !== "undefined" ? date : undefined));
+  const invoiceStatus = value(typeof orderStatus !== "undefined" ? orderStatus : undefined, value(typeof status !== "undefined" ? status : undefined, "RECEIVED"));
+  const payment = typeof paymentInfo !== "undefined" ? paymentInfo : {};
+  const sellerData = typeof sellerInfo !== "undefined"
+    ? sellerInfo
+    : (typeof seller !== "undefined" ? seller : (typeof company !== "undefined" ? company : {}));
+  const customerData = typeof customerInfo !== "undefined"
+    ? customerInfo
+    : (typeof customer !== "undefined" ? customer : (typeof client !== "undefined" ? client : {}));
+  const rows = Array.isArray(typeof items !== "undefined" ? items : undefined) ? items : [];
+  const totalsData = typeof totals !== "undefined" ? totals : {};
+
+  const money = (input) => {
+    const number = Number(input);
+    return Number.isFinite(number) ? `${currencySymbol}${number.toFixed(2)}` : `${currencySymbol}${value(input, "0.00")}`;
+  };
+  const amount = (input) => {
+    const number = Number(input);
+    return Number.isFinite(number) ? number.toFixed(2) : value(input, "0.00");
+  };
+  const currencyLabel = currencySymbol.trim();
+
+  const lineUnit = (item) => value(item.unitPrice, value(item.unit, 0));
+  const lineQty = (item) => Number(value(item.quantity, item.qty || 0));
+  const lineDiscount = (item) => value(item.discount, value(item.discountAmount, value(item.discountValue, 0)));
+  const lineTax = (item) => value(item.tax, value(item.gst, 0));
+  const lineTotal = (item) => value(item.total, value(item.amount, Number(lineUnit(item)) * lineQty(item)));
+  const labelValue = (label, input) => `${label}: ${input}`;
+  const addonText = (addon) => {
+    if (typeof addon === "string") return addon;
+    if (!addon || typeof addon !== "object") return "";
+
+    const name = value(addon.name, value(addon.title, value(addon.label, "")));
+    const price = value(addon.price, value(addon.amount, value(addon.value, "")));
+    return price !== "" ? `${name} (+${money(price)})` : name;
+  };
+  const detailText = (detail) => {
+    if (typeof detail === "string") return detail;
+    if (!detail || typeof detail !== "object") return "";
+
+    const label = value(detail.label, value(detail.name, value(detail.key, "")));
+    const detailValue = value(detail.value, value(detail.text, value(detail.description, "")));
+    return label && detailValue ? labelValue(label, detailValue) : value(detailValue, label);
+  };
+  const pushList = (target, label, input) => {
+    if (!input) return;
+
+    if (Array.isArray(input)) {
+      const list = input.map(label === "Addons" ? addonText : detailText).filter(Boolean);
+      if (list.length) target.push(labelValue(label, list.join(", ")));
+      return;
+    }
+
+    target.push(labelValue(label, input));
+  };
+  const lineDetails = (item) => {
+    const details = [];
+    pushList(details, "Service", value(item.service, item.serviceName));
+    pushList(details, "Size", value(item.size, item.paperSize));
+    pushList(details, "Color", item.color);
+    pushList(details, "Print Type", value(item.printType, item.side));
+    pushList(details, "Addons", value(item.addons, value(item.addOns, item.options)));
+
+    const extraDetails = value(item.details, value(item.orderDetails, item.metadata));
+    if (Array.isArray(extraDetails)) {
+      extraDetails.map(detailText).filter(Boolean).forEach((detail) => details.push(detail));
+    } else if (extraDetails && typeof extraDetails === "object") {
+      Object.entries(extraDetails).forEach(([key, detailValue]) => {
+        if (detailValue !== undefined && detailValue !== null && detailValue !== "") {
+          details.push(labelValue(key, detailValue));
+        }
+      });
+    }
+
+    return details;
+  };
+
+  const itemSubtotal = value(totalsData.itemSubtotal, value(typeof subtotal !== "undefined" ? subtotal : undefined, 0));
+  const invoiceAddonsSubtotal = value(totalsData.addonsSubtotal, typeof addonsSubtotal !== "undefined" ? addonsSubtotal : 0);
+  const invoiceDeliveryFee = value(totalsData.deliveryFee, typeof deliveryFee !== "undefined" ? deliveryFee : 0);
+  const invoicePlatformFee = value(totalsData.platformFee, typeof platformFee !== "undefined" ? platformFee : 0);
+  const invoiceDiscount = value(totalsData.discount, value(totalsData.discountAmount, typeof discount !== "undefined" ? discount : 0));
+  const invoiceTaxAmount = value(totalsData.taxAmount, typeof taxAmount !== "undefined" ? taxAmount : 0);
+  const grandTotal = value(totalsData.grandTotal, value(typeof total !== "undefined" ? total : undefined, 0));
+  const brandName = value(sellerData.brandName, value(sellerData.name, "PrintCampus"));
+  const brandLogoSrc = value(sellerData.logoDataUri, value(typeof logoDataUri !== "undefined" ? logoDataUri : undefined, ""));
+%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Invoice <%= invoiceId %></title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #1f2937;
+    font-size: 12px;
+    padding: 44px 50px;
+    background: #ffffff;
+  }
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 22px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .brand {
+    width: 170px;
+  }
+  .brand-logo {
+    display: block;
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+  }
+  .brand p, .invoice-meta p, .party p, .payment p {
+    color: #475569;
+    line-height: 1.45;
+  }
+  .invoice-meta {
+    text-align: right;
+    min-width: 230px;
+  }
+  .invoice-meta h2 {
+    color: #0f172a;
+    font-size: 18px;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+  }
+  .status {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 4px 10px;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+  .section-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 48px;
+    row-gap: 20px;
+    margin-top: 28px;
+  }
+  .section-title {
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 800;
+    margin-bottom: 9px;
+  }
+  .party strong {
+    display: block;
+    color: #334155;
+    margin-bottom: 4px;
+  }
+  .payment {
+    margin-top: 22px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 28px;
+    table-layout: fixed;
+  }
+  thead th {
+    background: #f8fafc;
+    color: #1e293b;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 11px;
+    padding: 10px 8px;
+    text-align: left;
+  }
+  tbody td {
+    border-bottom: 1px solid #e2e8f0;
+    color: #334155;
+    padding: 12px 8px;
+    vertical-align: top;
+    page-break-inside: avoid;
+  }
+  .serial { width: 6%; }
+  .description { width: 34%; }
+  .number { text-align: right; }
+  .item-name {
+    color: #334155;
+    font-weight: 700;
+    margin-bottom: 4px;
+    overflow-wrap: anywhere;
+  }
+  .item-detail {
+    color: #64748b;
+    font-size: 11px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+  .summary {
+    width: 255px;
+    margin: 26px 0 0 auto;
+  }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    color: #475569;
+    padding: 5px 0;
+  }
+  .summary-total {
+    border-top: 1px solid #94a3b8;
+    color: #0f172a;
+    font-size: 15px;
+    font-weight: 700;
+    margin-top: 8px;
+    padding-top: 10px;
+  }
+  .notes {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    border-top: 1px solid #cbd5e1;
+    color: #64748b;
+    font-size: 11px;
+    line-height: 1.5;
+    margin-top: 70px;
+    padding-top: 12px;
+  }
+  .footer-contact {
+    color: #475569;
+  }
+  .page {
+    display: block;
+    margin-top: 6px;
+    text-align: right;
+  }
+  @media print {
+    body { padding: 34px 42px; }
+  }
+</style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <% if (brandLogoSrc) { %>
+        <img class="brand-logo" src="<%= brandLogoSrc %>" alt="<%= brandName %>">
+      <% } else { %>
+        <strong><%= brandName %></strong>
+      <% } %>
+    </div>
+    <div class="invoice-meta">
+      <h2>TAX INVOICE</h2>
+      <p>
+        Invoice No: <%= invoiceId %><br>
+        Date: <%= invoiceDate %><br>
+        Order Status: <%= invoiceStatus %>
+      </p>
+      <span class="status"><%= invoiceStatus %></span>
+    </div>
+  </header>
+
+  <section class="section-grid">
+    <div class="party">
+      <div class="section-title">Sold By (Seller):</div>
+      <p>
+        <strong><%= value(sellerData.legalName, value(sellerData.name, "PrintCampus Solutions Private Limited")) %></strong>
+        <%= value(sellerData.address, "") %><% if (sellerData.address) { %><br><% } %>
+        <%= value(sellerData.city, "") %><% if (sellerData.city) { %><br><% } %>
+        <% if (sellerData.gstin) { %>GSTIN: <%= sellerData.gstin %><% } %>
+      </p>
+    </div>
+    <div class="party">
+      <div class="section-title">Bill To (Customer):</div>
+      <p>
+        <strong><%= value(customerData.name, "") %></strong>
+        <%= value(customerData.address, "") %><% if (customerData.address) { %><br><% } %>
+        <%= value(customerData.city, "") %><% if (customerData.city) { %><br><% } %>
+        <% if (customerData.phone) { %>Phone: <%= customerData.phone %><br><% } %>
+        <% if (customerData.email) { %><%= customerData.email %><% } %>
+      </p>
+    </div>
+  </section>
+
+  <section class="payment">
+    <div class="section-title">Payment Info:</div>
+    <p>
+      Payment Status: <%= value(payment.status, value(typeof paymentStatus !== "undefined" ? paymentStatus : undefined, "PAID")) %><br>
+      Payment Mode: <%= value(payment.mode, value(typeof paymentMode !== "undefined" ? paymentMode : undefined, "")) %><br>
+      Transaction ID: <%= value(payment.transactionId, value(typeof transactionId !== "undefined" ? transactionId : undefined, "")) %>
+    </p>
+  </section>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="serial">S.No</th>
+        <th class="description">Item &amp; Description</th>
+        <th class="number">Unit Price (<%= currencyLabel %>)</th>
+        <th class="number">Qty</th>
+        <th class="number">Discount (<%= currencyLabel %>)</th>
+        <th class="number">Tax (GST) (<%= currencyLabel %>)</th>
+        <th class="number">Total (<%= currencyLabel %>)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (rows.length) { %>
+        <% rows.forEach(function(item, index) { %>
+          <tr>
+            <td><%= value(item.serial, index + 1) %></td>
+            <td>
+              <div class="item-name"><%= value(item.title, value(item.description, "Item")) %></div>
+              <% lineDetails(item).forEach(function(detail) { %>
+                <div class="item-detail"><%= detail %></div>
+              <% }); %>
+            </td>
+            <td class="number"><%= amount(lineUnit(item)) %></td>
+            <td class="number"><%= lineQty(item) %></td>
+            <td class="number"><%= amount(lineDiscount(item)) %></td>
+            <td class="number"><%= amount(lineTax(item)) %></td>
+            <td class="number"><%= amount(lineTotal(item)) %></td>
+          </tr>
+        <% }); %>
+      <% } else { %>
+        <tr>
+          <td colspan="7">No invoice items available.</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+
+  <section class="summary">
+    <div class="summary-row"><span>Item Subtotal:</span><span><%= amount(itemSubtotal) %></span></div>
+    <div class="summary-row"><span>Add-ons Subtotal:</span><span><%= amount(invoiceAddonsSubtotal) %></span></div>
+    <div class="summary-row"><span>Delivery Fee:</span><span><%= amount(invoiceDeliveryFee) %></span></div>
+    <div class="summary-row"><span>Platform Fee:</span><span><%= amount(invoicePlatformFee) %></span></div>
+    <div class="summary-row"><span>Discount:</span><span>-<%= amount(invoiceDiscount) %></span></div>
+    <div class="summary-row"><span>Tax (GST):</span><span><%= amount(invoiceTaxAmount) %></span></div>
+    <div class="summary-row summary-total"><span>Grand Total:</span><span><%= money(grandTotal) %></span></div>
+  </section>
+
+  <footer class="notes">
+    <div class="footer-contact">
+      <%= value(sellerData.tagline, "Online Document Printing & Stationery Services") %><br>
+      Email: <%= value(sellerData.email, "support@printcampus.com") %><br>
+      Website: <%= value(sellerData.website, "www.printcampus.com") %>
+    </div>
+    <div>
+      <span>This is a computer-generated tax invoice and requires no physical or digital signature.</span>
+      <span class="page">Page 1 of 1</span>
+    </div>
+  </footer>
+</body>
+</html>
