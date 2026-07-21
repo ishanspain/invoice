@@ -98,6 +98,11 @@ const styles = {
     fontSize: 12,
     lineHeight: 1.5,
   },
+  supportLink: {
+    color: "#ff6900",
+    fontWeight: 700,
+    textDecoration: "none",
+  },
 };
 
 export default function InvalidVerification({ title, message, invoiceId }) {
@@ -133,7 +138,14 @@ export default function InvalidVerification({ title, message, invoiceId }) {
             </div>
 
             <p style={styles.footer}>
-              If you believe this is a mistake, contact support@printcampus.in.
+              If you believe this is a mistake, contact{" "}
+              <a
+                href="mailto:support@printcampus.in"
+                style={styles.supportLink}
+              >
+                support@printcampus.in
+              </a>
+              .
             </p>
           </section>
         </main>
