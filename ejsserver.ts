@@ -133,7 +133,12 @@ app.get("/", (req, res) => {
   res.render("invoice", data);
 });
 
-app.get("/verify", (req, res) => {
+app.get("/verify/:invoiceId", (req, res) => {
+  console.log("Verification path:", req.path);
+  console.log("Invoice ID:", req.params.invoiceId);
+  console.log("Verification query:", req.query);
+  console.log("Signature:", req.query.sig);
+
   res.render("invoice", data);
 });
 
