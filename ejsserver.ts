@@ -5,10 +5,10 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import qrCodeDataUrl from "./utils/qr.ts";
+import lanIpAddress from "./utils/ipaddress.ts";
 import { envConfigs } from "./configs/envConfigs.ts";
 // import puppeteer from "puppeteer";
 // import htmlPdf from "html-pdf-node";
-
 
 const app = express();
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -133,6 +133,10 @@ app.get("/", (req, res) => {
   res.render("invoice", data);
 });
 
+app.get("/verify", (req, res) => {
+  res.render("invoice", data);
+});
+
 /* app.get("/pdf", async (req, res) => {
   try {
     const html = await ejs.renderFile("./views/invoice.ejs", data);
@@ -184,6 +188,7 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 55555;
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running locally at http://localhost:${PORT}`);
+  console.log(`Server available on your LAN at http://${lanIpAddress}:${PORT}`);
 });
