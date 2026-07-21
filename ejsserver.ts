@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import qrCodeDataUrl from "./utils/qr.ts";
 import lanIpAddress from "./utils/ipaddress.ts";
 import { envConfigs } from "./configs/envConfigs.ts";
+import { verifySignature } from "./utils/signer.ts";
 // import puppeteer from "puppeteer";
 // import htmlPdf from "html-pdf-node";
 
@@ -135,11 +136,24 @@ app.get("/", (req, res) => {
 
 app.get("/verify/:invoiceId", (req, res) => {
   console.log("Verification path:", req.path);
-  console.log("Invoice ID:", req.params.invoiceId);
+  const invoiceID = req.params.invoiceId;
+  console.log("Invoice ID:", invoiceID);
   console.log("Verification query:", req.query);
-  console.log("Signature:", req.query.sig);
+  const sig = req.query.sig;
+  console.log("Signature:", sig);
 
-  res.render("invoice", data);
+  if (typeof invoiceID !== "string" || typeof sig !== "string") {
+    return res.status(400).send("Invalid invoice ID or signature");
+  }
+
+  const isSignvalid = verifySignature(sig, invoiceID);
+  console.log("sig state", isSignvalid);
+
+  if (!isSignvalid) {
+    return res.status(400).send(" invoice ID has beem tempered/modified");
+  }
+
+  return res.render("invoice", data);
 });
 
 /* app.get("/pdf", async (req, res) => {
@@ -193,7 +207,9 @@ app.get("/verify/:invoiceId", (req, res) => {
 
 const configuredPort = Number.parseInt(process.env.PORT ?? "55555", 10);
 const PORT =
-  Number.isInteger(configuredPort) && configuredPort >= 1 && configuredPort <= 65_535
+  Number.isInteger(configuredPort) &&
+  configuredPort >= 1 &&
+  configuredPort <= 65_535
     ? configuredPort
     : 55555;
 
