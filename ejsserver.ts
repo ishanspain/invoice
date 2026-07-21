@@ -4,9 +4,11 @@ import ejs from "ejs";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import qrCodeDataUrl from "./qr.ts";
+import qrCodeDataUrl from "./utils/qr.ts";
+import { envConfigs } from "./configs/envConfigs.ts";
 // import puppeteer from "puppeteer";
 // import htmlPdf from "html-pdf-node";
+
 
 const app = express();
 const __dirname = dirname(fileURLToPath(import.meta.url));

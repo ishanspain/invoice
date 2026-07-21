@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "node --watch ejsserver.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -13,6 +14,7 @@
   "dependencies": {
     "ejs": "^6.0.1",
     "express": "^5.2.1",
-    "qrcode": "^1.5.4"
+    "qrcode": "^1.5.4",
+    "zod": "^4.4.3"
   }
 }
