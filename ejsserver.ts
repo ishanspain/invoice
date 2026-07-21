@@ -186,7 +186,11 @@ app.get("/verify", (req, res) => {
   res.send(pdfBuffer);
 }); */
 
-const PORT = process.env.PORT || 55555;
+const configuredPort = Number.parseInt(process.env.PORT ?? "55555", 10);
+const PORT =
+  Number.isInteger(configuredPort) && configuredPort >= 1 && configuredPort <= 65_535
+    ? configuredPort
+    : 55555;
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running locally at http://localhost:${PORT}`);
