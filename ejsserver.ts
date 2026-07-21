@@ -1,4 +1,5 @@
 import express from "express";
+import expressReactViews from "express-react-views";
 // import wkhtmltopdf from "wkhtmltopdf";
 import ejs from "ejs";
 import { readFileSync } from "node:fs";
@@ -24,6 +25,7 @@ const printCampusSignatureDataUri = `data:image/jpeg;base64,${readFileSync(
 
 app.set("view engine", "ejs");
 app.set("views", "./views");
+app.engine("jsx", expressReactViews.createEngine());
 
 const data = {
   invoiceNumber: "INV-PC1207260001",
@@ -131,7 +133,7 @@ const data = {
 };
 
 app.get("/", (req, res) => {
-  res.render("invoice", data);
+  return res.render("invoice", data);
 });
 
 app.get("/verify/:invoiceId", (req, res) => {
@@ -143,14 +145,24 @@ app.get("/verify/:invoiceId", (req, res) => {
   console.log("Signature:", sig);
 
   if (typeof invoiceID !== "string" || typeof sig !== "string") {
-    return res.status(400).send("Invalid invoice ID or signature");
+    return res.status(400).render("invalid-verification.jsx", {
+      title: "Invalid verification link",
+      message:
+        "This verification link is incomplete or incorrectly formatted. Please scan the QR code on the invoice again.",
+      invoiceId: typeof invoiceID === "string" ? invoiceID : undefined,
+    });
   }
 
   const isSignvalid = verifySignature(sig, invoiceID);
   console.log("sig state", isSignvalid);
 
   if (!isSignvalid) {
-    return res.status(400).send(" invoice ID has beem tempered/modified");
+    return res.status(400).render("invalid-verification.jsx", {
+      title: "Invoice verification failed",
+      message:
+        "This invoice ID or its verification signature has been tampered with or modified. Do not rely on this invoice until its authenticity is confirmed.",
+      invoiceId: invoiceID,
+    });
   }
 
   return res.render("invoice", data);
