@@ -1,13 +1,20 @@
 import QRCode from "qrcode";
 import lanIpAddress from "./ipaddress.js";
 import { createSignature } from "./signer.js";
+import { createJwtToken } from "./jwt.js";
 
 const port = process.env.PORT ?? "55555";
 const invoiceID = "INV-123";
 
-const signedInvoice = createSignature(invoiceID);
+// const signedInvoice = createSignature(invoiceID);
 
-const verificationUrl = `http://${lanIpAddress}:${port}/verify/${invoiceID}?sig=${signedInvoice}`;
+const data = {
+  invoiceID,
+};
+const base64Payload = createJwtToken(data);
+
+// const verificationUrl = `http://${lanIpAddress}:${port}/verify/${invoiceID}?sig=${signedInvoice}`;
+const verificationUrl = `http://${lanIpAddress}:${port}/verify?token=${base64Payload}`;
 console.log("verificationUrl", verificationUrl);
 
 const qrCodeDataUrl = await QRCode.toDataURL(verificationUrl, {

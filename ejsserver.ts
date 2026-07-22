@@ -9,6 +9,7 @@ import qrCodeDataUrl from "./utils/qr.js";
 import lanIpAddress from "./utils/ipaddress.js";
 import { envConfigs } from "./configs/envConfigs.js";
 import { verifySignature } from "./utils/signer.js";
+import { verifyJwtToken } from "./utils/jwt.js";
 // import puppeteer from "puppeteer";
 // import htmlPdf from "html-pdf-node";
 
@@ -142,7 +143,7 @@ app.get("/", (req, res) => {
   return res.render("invoice", data);
 });
 
-app.get("/verify/:invoiceId", (req, res) => {
+/* app.get("/verify/:invoiceId", (req, res) => {
   console.log("Verification path:", req.path);
   const invoiceID = req.params.invoiceId;
   console.log("Invoice ID:", invoiceID);
@@ -168,6 +169,35 @@ app.get("/verify/:invoiceId", (req, res) => {
       message:
         "This invoice ID or its verification signature has been tampered with or modified. Do not rely on this invoice until its authenticity is confirmed.",
       invoiceId: invoiceID,
+    });
+  }
+
+  return res.render("invoice", data);
+}); */
+
+app.get("/verify", (req, res) => {
+  console.log("Verification path:", req.path);
+  const token = req.query.token;
+  console.log("Token:", token);
+
+  if (typeof token !== "string") {
+    return res.status(400).render(`invalid-verification.${viewExt}`, {
+      title: "Invalid verification link",
+      message:
+        "This verification link is incomplete or incorrectly formatted. Please scan the QR code on the invoice again.",
+      signature: typeof token === "string" ? token : undefined,
+    });
+  }
+
+  const tokenPayload = verifyJwtToken(token);
+  console.log("token Payload", tokenPayload);
+
+  if (!tokenPayload) {
+    return res.status(400).render(`invalid-verification.${viewExt}`, {
+      title: "Invoice verification failed",
+      message:
+        "This invoice ID or its verification signature has been tampered with or modified. Do not rely on this invoice until its authenticity is confirmed.",
+      signature: token,
     });
   }
 

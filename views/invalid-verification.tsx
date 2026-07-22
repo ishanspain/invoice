@@ -3,7 +3,7 @@ import React from "react";
 export interface InvalidVerificationProps {
   title: string;
   message: string;
-  invoiceId?: string;
+  signature?: string;
 }
 
 const styles: Record<string, React.CSSProperties> = {
@@ -114,7 +114,7 @@ const styles: Record<string, React.CSSProperties> = {
 export default function InvalidVerification({
   title,
   message,
-  invoiceId,
+  signature,
 }: InvalidVerificationProps) {
   return (
     <html lang="en">
@@ -134,10 +134,10 @@ export default function InvalidVerification({
             <h1 style={styles.heading}>{title}</h1>
             <p style={styles.message}>{message}</p>
 
-            {invoiceId ? (
+            {signature ? (
               <div style={styles.invoice}>
-                <span style={styles.invoiceLabel}>Invoice ID:</span>
-                <strong>{invoiceId}</strong>
+                <span style={styles.invoiceLabel}>Signature:</span>
+                <strong>{signature}</strong>
               </div>
             ) : null}
 
