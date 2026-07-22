@@ -8,7 +8,6 @@
     "jsx": "react",
     "lib": ["ES2022", "DOM"],
     "types": ["node"],
-    "allowImportingTsExtensions": true,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -17,5 +16,5 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": ["*.ts", "**/*.ts", "views/*.tsx"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "dist"]
 }

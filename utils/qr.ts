@@ -1,6 +1,6 @@
 import QRCode from "qrcode";
-import lanIpAddress from "./ipaddress.ts";
-import { createSignature } from "./signer.ts";
+import lanIpAddress from "./ipaddress.js";
+import { createSignature } from "./signer.js";
 
 const port = process.env.PORT ?? "55555";
 const invoiceID = "INV-123";

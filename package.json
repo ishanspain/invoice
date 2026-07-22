@@ -5,6 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx --watch ejsserver.ts",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json && esbuild views/*.tsx --bundle --format=cjs --external:react --outdir=dist/views --out-extension:.js=.cjs && cp -r assets dist/assets && cp views/*.ejs dist/views/",
+    "start": "node dist/ejsserver.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

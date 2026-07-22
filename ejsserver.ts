@@ -5,10 +5,10 @@ import ejs from "ejs";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import qrCodeDataUrl from "./utils/qr.ts";
-import lanIpAddress from "./utils/ipaddress.ts";
-import { envConfigs } from "./configs/envConfigs.ts";
-import { verifySignature } from "./utils/signer.ts";
+import qrCodeDataUrl from "./utils/qr.js";
+import lanIpAddress from "./utils/ipaddress.js";
+import { envConfigs } from "./configs/envConfigs.js";
+import { verifySignature } from "./utils/signer.js";
 // import puppeteer from "puppeteer";
 // import htmlPdf from "html-pdf-node";
 
@@ -24,10 +24,14 @@ const printCampusSignatureDataUri = `data:image/jpeg;base64,${readFileSync(
 )}`;
 
 const viewsDirectory = join(__dirname, "views");
+const reactViewEngine = reactViews({ viewsDirectory });
+const isProd = import.meta.url.endsWith(".js");
+const viewExt = isProd ? "cjs" : "tsx";
 
 app.set("view engine", "ejs");
 app.set("views", viewsDirectory);
-app.engine("tsx", reactViews({ viewsDirectory }));
+app.engine("tsx", reactViewEngine);
+app.engine("cjs", reactViewEngine);
 
 const data = {
   invoiceNumber: "INV-PC1207260001",
@@ -147,7 +151,7 @@ app.get("/verify/:invoiceId", (req, res) => {
   console.log("Signature:", sig);
 
   if (typeof invoiceID !== "string" || typeof sig !== "string") {
-    return res.status(400).render("invalid-verification.tsx", {
+    return res.status(400).render(`invalid-verification.${viewExt}`, {
       title: "Invalid verification link",
       message:
         "This verification link is incomplete or incorrectly formatted. Please scan the QR code on the invoice again.",
@@ -159,7 +163,7 @@ app.get("/verify/:invoiceId", (req, res) => {
   console.log("sig state", isSignvalid);
 
   if (!isSignvalid) {
-    return res.status(400).render("invalid-verification.tsx", {
+    return res.status(400).render(`invalid-verification.${viewExt}`, {
       title: "Invoice verification failed",
       message:
         "This invoice ID or its verification signature has been tampered with or modified. Do not rely on this invoice until its authenticity is confirmed.",

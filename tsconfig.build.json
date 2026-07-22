@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "dist",
+    "noEmit": false,
+    "isolatedModules": false,
+    "sourceMap": false,
+    "declaration": false
+  },
+  "include": ["ejsserver.ts", "utils/*.ts", "configs/*.ts"],
+  "exclude": ["node_modules", "dist", "tests", "viewstest", "backupTemps", "updates"]
+}
