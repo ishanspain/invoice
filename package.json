@@ -24,6 +24,7 @@
     "express-tsx-views": "^1.4.14",
     "globals": "^17.7.0",
     "internal-ip": "^9.0.0",
+    "jsonwebtoken": "^9.0.3",
     "qrcode": "^1.5.4",
     "typescript-eslint": "^8.65.0",
     "zod": "^4.4.3"
@@ -31,6 +32,7 @@
   "devDependencies": {
     "@types/ejs": "^3.1.5",
     "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.1.1",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^16.14.0",
