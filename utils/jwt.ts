@@ -15,6 +15,7 @@ function isObject(value: unknown): value is JwtObject {
 export function createJwtToken<T extends JwtObject>(data: T): string {
   return jwt.sign({ data }, envConfigs.SIGN_SECRET, {
     algorithm: "HS256",
+    noTimestamp: true,
   });
 }
 
