@@ -201,6 +201,8 @@ app.get("/verify", (req, res) => {
     });
   }
 
+  console.log("Verified signature")
+
   return res.render("invoice", data);
 });
 
