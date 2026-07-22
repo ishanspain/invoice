@@ -1,0 +1,31 @@
+Global ESLint is generally a bad idea, for a few concrete reasons:
+
+Why not global:
+
+Version drift — different projects need different ESLint versions/plugin combos. A global install locks you to one version across everything, and plugins (eslint-plugin-react, @typescript-eslint, etc.) still need to be resolved from somewhere.
+Editor integration breaks — VS Code's ESLint extension resolves the binary from the project's local node_modules by default (eslint.nodePath/useESLintClass settings). It won't reliably pick up a global install, so you get "works in terminal, red squiggly lines missing in editor."
+
+---------------------------------------------------
+Editor integration breaks — VS Code's ESLint extension resolves the binary from the project's local node_modules by default (eslint.nodePath/useESLintClass settings). It won't reliably pick up a global install, so you get "works in terminal, red squiggly lines missing in editor.
+---------------------------------------------------------------
+CI/CD and teammates — your CI pipeline and anyone else cloning the repo won't have your global install. If it's not in package.json, it doesn't exist as far as reproducibility goes.
+---------------------------------------------------------------
+=================================================
+// VS code/IDE setting customization: - 
+is this the fix only ????
+
+for getting linting error also in vscode: -
+- we have to add this 
+{
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ]
+}
+
+also for fixing via vscode action we need to add: - 
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  }
