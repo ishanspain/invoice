@@ -1,5 +1,5 @@
 import express from "express";
-import expressReactViews from "express-react-views";
+import { reactViews } from "express-tsx-views";
 // import wkhtmltopdf from "wkhtmltopdf";
 import ejs from "ejs";
 import { readFileSync } from "node:fs";
@@ -23,9 +23,11 @@ const printCampusSignatureDataUri = `data:image/jpeg;base64,${readFileSync(
   "base64",
 )}`;
 
+const viewsDirectory = join(__dirname, "views");
+
 app.set("view engine", "ejs");
-app.set("views", "./views");
-app.engine("jsx", expressReactViews.createEngine());
+app.set("views", viewsDirectory);
+app.engine("tsx", reactViews({ viewsDirectory }));
 
 const data = {
   invoiceNumber: "INV-PC1207260001",
@@ -145,7 +147,7 @@ app.get("/verify/:invoiceId", (req, res) => {
   console.log("Signature:", sig);
 
   if (typeof invoiceID !== "string" || typeof sig !== "string") {
-    return res.status(400).render("invalid-verification.jsx", {
+    return res.status(400).render("invalid-verification.tsx", {
       title: "Invalid verification link",
       message:
         "This verification link is incomplete or incorrectly formatted. Please scan the QR code on the invoice again.",
@@ -157,7 +159,7 @@ app.get("/verify/:invoiceId", (req, res) => {
   console.log("sig state", isSignvalid);
 
   if (!isSignvalid) {
-    return res.status(400).render("invalid-verification.jsx", {
+    return res.status(400).render("invalid-verification.tsx", {
       title: "Invoice verification failed",
       message:
         "This invoice ID or its verification signature has been tampered with or modified. Do not rely on this invoice until its authenticity is confirmed.",

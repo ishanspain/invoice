@@ -1,6 +1,12 @@
 import React from "react";
 
-const styles = {
+export interface InvalidVerificationProps {
+  title: string;
+  message: string;
+  invoiceId?: string;
+}
+
+const styles: Record<string, React.CSSProperties> = {
   body: {
     minHeight: "100vh",
     margin: 0,
@@ -105,7 +111,11 @@ const styles = {
   },
 };
 
-export default function InvalidVerification({ title, message, invoiceId }) {
+export default function InvalidVerification({
+  title,
+  message,
+  invoiceId,
+}: InvalidVerificationProps) {
   return (
     <html lang="en">
       <head>
